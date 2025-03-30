@@ -20,12 +20,6 @@ steps:
     includePreviewVersions: false
     performMultiLevelLookup: true
 
-# Install additional .NET workloads
-- script: |
-    dotnet workload install wasm-tools
-  displayName: 'Install additional .NET workloads'
-  continueOnError: true
-
 # Verify SDK installation
 - script: |
     dotnet --list-sdks
@@ -56,14 +50,13 @@ steps:
     projects: '**/*Tests/*.csproj'
     arguments: '--configuration $(buildConfiguration) --no-build'
 
-# Publish web app
-# Alternative approach
+# Publish web app - fixing the path issue
 - task: DotNetCoreCLI@2
   displayName: 'dotnet publish'
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '--configuration $(buildConfiguration) --output $(Agent.TempDirectory)/output'
+    arguments: '--configuration $(buildConfiguration) --output "$(Build.ArtifactStagingDirectory)/output"'
     zipAfterPublish: true
 
 # Then copy to artifact staging directory
