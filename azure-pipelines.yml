@@ -57,10 +57,19 @@ steps:
     arguments: '--configuration $(buildConfiguration) --no-build'
 
 # Publish web app
+# Alternative approach
 - task: DotNetCoreCLI@2
   displayName: 'dotnet publish'
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    arguments: '--configuration $(buildConfiguration) --output $(Agent.TempDirectory)/output'
     zipAfterPublish: true
+
+# Then copy to artifact staging directory
+- task: CopyFiles@2
+  displayName: 'Copy files to artifact staging directory'
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)/output'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
