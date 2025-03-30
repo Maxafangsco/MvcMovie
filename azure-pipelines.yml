@@ -50,7 +50,7 @@ steps:
     projects: '**/*Tests/*.csproj'
     arguments: '--configuration $(buildConfiguration) --no-build'
 
-# Publish web app - fixing the path issue
+# Publish web app - this publishes directly to artifact staging directory
 - task: DotNetCoreCLI@2
   displayName: 'dotnet publish'
   inputs:
@@ -59,10 +59,10 @@ steps:
     arguments: '--configuration $(buildConfiguration) --output "$(Build.ArtifactStagingDirectory)/output"'
     zipAfterPublish: true
 
-# Then copy to artifact staging directory
-- task: CopyFiles@2
-  displayName: 'Copy files to artifact staging directory'
+# Add a Publish Build Artifacts task to publish the output
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifacts'
   inputs:
-    SourceFolder: '$(Agent.TempDirectory)/output'
-    Contents: '**'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
