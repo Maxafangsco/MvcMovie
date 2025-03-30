@@ -20,17 +20,17 @@ steps:
     includePreviewVersions: false
     performMultiLevelLookup: true
 
+# Install additional .NET workloads
+- script: |
+    dotnet workload install wasm-tools
+  displayName: 'Install additional .NET workloads'
+  continueOnError: true
+
 # Verify SDK installation
 - script: |
     dotnet --list-sdks
     dotnet --info
   displayName: 'Verify .NET SDK Installation'
-
-# Install ASP.NET Core workload if needed
-- script: |
-    dotnet workload install aspnetcore
-  displayName: 'Install ASP.NET Core workload'
-  continueOnError: true  # In .NET 8, this may be included by default
 
 # Use DotNetCoreCLI for restore
 - task: DotNetCoreCLI@2
