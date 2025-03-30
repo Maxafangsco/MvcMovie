@@ -8,10 +8,10 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  dotnetSdkVersion: '6.0.420'  # Specify exact version
+  dotnetSdkVersion: '8.0.x'  # Updated to match project's .NET 8.0 target
 
 steps:
-# Install .NET SDK with explicit version
+# Install .NET SDK with correct version
 - task: UseDotNet@2
   displayName: 'Install .NET SDK'
   inputs:
@@ -20,12 +20,19 @@ steps:
     includePreviewVersions: false
     performMultiLevelLookup: true
 
-# Install ASP.NET Core workload
+# Verify SDK installation
+- script: |
+    dotnet --list-sdks
+    dotnet --info
+  displayName: 'Verify .NET SDK Installation'
+
+# Install ASP.NET Core workload if needed
 - script: |
     dotnet workload install aspnetcore
   displayName: 'Install ASP.NET Core workload'
+  continueOnError: true  # In .NET 8, this may be included by default
 
-# Use DotNetCoreCLI for restore (better for .NET Core projects)
+# Use DotNetCoreCLI for restore
 - task: DotNetCoreCLI@2
   displayName: 'dotnet restore'
   inputs:
@@ -33,7 +40,7 @@ steps:
     projects: '**/*.csproj'
     feedsToUse: 'select'
 
-# Build with dotnet instead of VSBuild
+# Build with dotnet
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
