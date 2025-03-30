@@ -1,0 +1,68 @@
+trigger:
+- master
+
+pool:
+  name: 'SelfHostedAgents_ms'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  dotnetSdkVersion: '8.0.x'  # Updated to match project's .NET 8.0 target
+
+steps:
+# Install .NET SDK with correct version
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '$(dotnetSdkVersion)'
+    includePreviewVersions: false
+    performMultiLevelLookup: true
+
+# Verify SDK installation
+- script: |
+    dotnet --list-sdks
+    dotnet --info
+  displayName: 'Verify .NET SDK Installation'
+
+# Use DotNetCoreCLI for restore
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+    feedsToUse: 'select'
+
+# Build with dotnet
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+# Test with dotnet
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: 'test'
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build'
+
+# Publish web app - this publishes directly to artifact staging directory
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '--configuration $(buildConfiguration) --output "$(Build.ArtifactStagingDirectory)/output"'
+    zipAfterPublish: true
+
+# Add a Publish Build Artifacts task to publish the output
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifacts'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
