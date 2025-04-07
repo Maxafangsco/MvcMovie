@@ -8,7 +8,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  dotnetSdkVersion: '8.0.x'  # Updated to match project's .NET 8.0 target
+  dotnetSdkVersion: '8.0.x'
 
 steps:
 # Install .NET SDK with correct version
